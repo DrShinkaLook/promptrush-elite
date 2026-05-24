@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>PromptRush Elite</title>
+
+  <link rel="stylesheet" href="style.css" />
+
+</head>
+
+<body>
+
+  <header class="status-bar" id="statusBar">
+
+    <div class="status-brand">
+
+      <span class="brand-name">PromptRush Elite</span>
+
+      <span class="brand-sub">Speed Word Trainer</span>
+
+    </div>
+
+    <div class="status-metrics">
+
+      <span class="metric"><label>Syllable</label><strong id="statusSyllable">—</strong></span>
+
+      <span class="metric"><label>Raw</label><strong id="statRaw">0</strong></span>
+
+      <span class="metric"><label>Format Valid</label><strong id="statValid" class="text-ok">0</strong></span>
+
+      <span class="metric"><label>Filtered</label><strong id="statInvalid" class="text-warn">0</strong></span>
+
+      <span class="metric"><label>Used</label><strong id="statUsed">0</strong></span>
+
+      <span class="metric elite-pill" id="eliteStatusPill">Elite Mode: OFF</span>
+
+    </div>
+
+    <div class="status-msg" id="toastArea" aria-live="polite"></div>
+
+  </header>
+
+
+
+  <main class="console-grid">
+
+    <aside class="panel panel-left">
+
+      <details class="card card-collapsible" open>
+
+        <summary class="card-summary">Word Engine</summary>
+
+        <div class="card-body">
+
+          <label class="toggle-row toggle-big">
+
+            <input type="checkbox" id="eliteMode" checked />
+
+            <span>Elite Assist Mode</span>
+
+          </label>
+
+          <label class="toggle-row toggle-compact">
+
+            <select id="sortMode" class="select select-block">
+
+              <option value="best">Best</option>
+
+              <option value="longest">Longest</option>
+
+              <option value="shortest">Shortest</option>
+
+              <option value="rare">Rare Letters</option>
+
+              <option value="hyphen">Hyphen Monsters</option>
+
+              <option value="easy">Easy Type</option>
+
+              <option value="accepted">Accepted First</option>
+
+            </select>
+
+          </label>
+
+          <label class="toggle-row toggle-compact">
+
+            <input type="checkbox" id="ignorePunctuationInMatch" checked />
+
+            <span>Ignore - / ' in match</span>
+
+          </label>
+
+          <label class="toggle-row toggle-compact">
+
+            <input type="checkbox" id="strictRawMatch" />
+
+            <span>Strict raw match</span>
+
+          </label>
+
+          <label class="toggle-row toggle-compact">
+
+            <input type="checkbox" id="hideUsed" checked />
+
+            <span>Hide used</span>
+
+          </label>
+
+          <label class="toggle-row toggle-compact">
+
+            <input type="checkbox" id="hideRejected" checked />
+
+            <span>Hide rejected</span>
+
+          </label>
+
+          <label class="toggle-row toggle-compact">
+
+            <input type="checkbox" id="acceptedFirst" />
+
+            <span>Accepted boost</span>
+
+          </label>
+
+          <label class="toggle-row toggle-compact">
+
+            <input type="checkbox" id="acceptedOnly" />
+
+            <span>Accepted only</span>
+
+          </label>
+
+          <p class="note-warn" id="acceptedOnlyNote" hidden>Accepted only shows words you marked locally — not an official dictionary.</p>
+
+          <label class="toggle-row toggle-compact">
+
+            <input type="checkbox" id="autoCopyBest" />
+
+            <span>Auto-copy best</span>
+
+          </label>
+
+          <label class="toggle-row toggle-compact">
+
+            <input type="checkbox" id="markCopiedAsUsed" checked />
+
+            <span>Mark copied as used</span>
+
+          </label>
+
+        </div>
+
+      </details>
+
+
+
+      <details class="card card-collapsible" open>
+
+        <summary class="card-summary">Custom Dictionary</summary>
+
+        <div class="card-body">
+
+          <div id="dictLoadState" class="dict-state">Loading dictionary…</div>
+
+          <ul class="stat-list" id="dictStats">
+
+            <li>Hyphen: <span id="statHyphen">0</span></li>
+
+            <li>Apostrophe: <span id="statApostrophe">0</span></li>
+
+            <li>Matches: <span id="statMatchCount">0</span></li>
+
+          </ul>
+
+          <label class="file-upload">
+
+            <span>Upload .txt</span>
+
+            <input type="file" id="dictUpload" accept=".txt,text/plain" />
+
+          </label>
+
+        </div>
+
+      </details>
+
+
+
+      <details class="card card-collapsible">
+
+        <summary class="card-summary">Screen Detection</summary>
+
+        <div class="card-body">
+
+          <p class="ocr-note">Manual typing is usually fastest for competitive practice.</p>
+
+          <button type="button" id="ocrScanBtn" class="btn btn-secondary btn-sm" disabled title="Placeholder">Scan Now (soon)</button>
+
+        </div>
+
+      </details>
+
+    </aside>
+
+
+
+    <section class="panel panel-center gameplay-panel">
+
+      <div class="prompt-zone">
+
+        <label for="syllableInput" class="prompt-label">Live prompt input</label>
+
+        <input
+
+          type="text"
+
+          id="syllableInput"
+
+          class="input-syllable input-syllable-hero"
+
+          placeholder="TYPE CURRENT SYLLABLE"
+
+          autocomplete="off"
+
+          spellcheck="false"
+
+          maxlength="30"
+
+        />
+
+        <p class="prompt-hints mono">Enter · copy top · Shift+Enter · next · Tab · cycle · Esc · clear</p>
+
+      </div>
+
+
+
+      <div class="next-word-card" id="nextWordCard">
+
+        <div class="next-label">▸ Top Suggestion</div>
+
+        <div class="next-word-display" id="nextWordDisplay">—</div>
+
+        <div class="next-meta">
+
+          <span class="meta-chip" id="nextWordLength">0 letters</span>
+
+          <span class="meta-chip meta-score" id="nextWordScore">score 0</span>
+
+          <span class="next-badges-row" id="nextWordBadges"></span>
+
+        </div>
+
+        <p class="define-preview" id="heroDefinition" aria-live="polite"></p>
+
+        <div class="next-actions next-actions-primary">
+
+          <button type="button" id="copyBestBtn" class="btn btn-primary btn-glow btn-hero">Copy Best <kbd>Enter</kbd></button>
+
+          <button type="button" id="copyNextBtn" class="btn btn-secondary btn-hero-secondary">Copy Next Best <kbd>Shift+Enter</kbd></button>
+
+          <button type="button" id="cycleNextBtn" class="btn btn-secondary btn-hero-secondary">Cycle <kbd>Tab</kbd></button>
+
+        </div>
+
+        <div class="next-mark">
+
+          <button type="button" id="markAcceptedHero" class="btn btn-accepted">Mark Accepted</button>
+
+          <button type="button" id="markRejectedHero" class="btn btn-rejected">Mark Rejected</button>
+
+          <button type="button" id="defineHero" class="btn btn-info">Define</button>
+
+        </div>
+
+      </div>
+
+
+
+      <div class="results-wrap">
+
+        <div class="results-header">
+
+          <h2>Ranked results</h2>
+
+          <span id="resultsCount" class="mono results-count">0 shown</span>
+
+        </div>
+
+        <div class="results-table-wrap">
+
+          <table class="results-table" id="resultsTable">
+
+            <thead>
+
+              <tr>
+
+                <th>Word</th>
+
+                <th>Len</th>
+
+                <th>Score</th>
+
+                <th>Status</th>
+
+                <th>Rare</th>
+
+                <th>Flags</th>
+
+                <th>Used</th>
+
+                <th>Actions</th>
+
+              </tr>
+
+            </thead>
+
+            <tbody id="resultsBody"></tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+
+    <aside class="panel panel-right">
+
+      <section class="card card-side">
+
+        <h2>Used words</h2>
+
+        <div class="btn-row">
+
+          <button type="button" id="undoUsedBtn" class="btn btn-secondary btn-sm">Undo Last <kbd>Ctrl+Z</kbd></button>
+
+          <button type="button" id="clearUsedBtn" class="btn btn-secondary btn-sm">Clear Used</button>
+
+          <button type="button" id="roundResetBtn" class="btn btn-warn btn-sm">Round Reset</button>
+
+        </div>
+
+        <div class="pill-list" id="recentUsedPills"></div>
+
+      </section>
+
+
+
+      <section class="card card-side">
+
+        <h2>Word memory</h2>
+
+        <p class="hint">Mark words you trust (Accepted Memory) or avoid (Rejected Memory). Stored only in your browser.</p>
+
+        <div class="learning-counts mono">
+
+          <span>Accepted: <strong id="countAccepted">0</strong></span>
+
+          <span>Rejected: <strong id="countRejected">0</strong></span>
+
+        </div>
+
+      </section>
+
+
+
+      <section class="card card-side">
+
+        <h2>Fast Practice</h2>
+
+        <button type="button" id="randomSyllableBtn" class="btn btn-primary btn-glow btn-sm">Random Syllable</button>
+
+        <button type="button" id="retryMissedBtn" class="btn btn-secondary btn-sm">Retry Missed</button>
+
+        <div class="practice-stats mono">
+
+          <div>Streak: <strong id="practiceStreak">0</strong></div>
+
+          <div>Avg time: <strong id="practiceAvg">—</strong></div>
+
+          <div>Timer: <strong id="practiceTimer">—</strong></div>
+
+          <div>Weak syllables: <span id="practiceWeak">—</span></div>
+
+        </div>
+
+      </section>
+
+    </aside>
+
+  </main>
+
+
+
+  <div id="manualCopyFallback" class="fallback hidden" role="alert">
+
+    <p>Clipboard blocked — copy manually:</p>
+
+    <input type="text" id="manualCopyInput" readonly />
+
+  </div>
+
+
+
+  <script src="storage.js"></script>
+
+  <script src="dictionary.js"></script>
+
+  <script src="ranking.js"></script>
+
+  <script src="script.js"></script>
+
+</body>
+
+</html>
+
+
